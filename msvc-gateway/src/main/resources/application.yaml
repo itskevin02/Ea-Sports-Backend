@@ -74,3 +74,7 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+app:
+  cors:
+    origenes: http://localhost:5173
