@@ -1,3 +1,4 @@
+
 package com.project.msvc_game.exception;
 
 import org.springframework.http.HttpStatus;
@@ -6,22 +7,23 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> manejarValidaciones(MethodArgumentNotValidException ex) {
+    public Map<String, String> manejarValidaciones(
+            MethodArgumentNotValidException ex) {
 
-        Map<String, String> errores = new HashMap<>();
+        String mensaje = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getDefaultMessage())
+                .collect(Collectors.joining(". "));
 
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            errores.put(error.getField(), error.getDefaultMessage());
-        });
-
-        return errores;
+        return Map.of("mensaje", mensaje);
     }
 }
