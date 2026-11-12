@@ -1,11 +1,19 @@
 package com.project.msvc_auth.controller;
 
+import com.project.msvc_auth.dto.LoginSolicitud;
+import com.project.msvc_auth.dto.LoginRespuesta;
+import com.project.msvc_auth.dto.UsuarioDTO;
+import com.project.msvc_auth.exception.CredencialesException;
 import com.project.msvc_auth.model.Auth;
+import com.project.msvc_auth.repository.AuthRepository;
 import com.project.msvc_auth.service.AuthService;
+import com.project.msvc_auth.service.JwtServicio;
+
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,8 +22,46 @@ import java.util.List;
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
+    private final AuthRepository authRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtServicio jwtServicio;
+
+    public AuthController(
+            AuthService authService,
+            AuthRepository authRepository,
+            PasswordEncoder passwordEncoder,
+            JwtServicio jwtServicio) {
+
+        this.authService = authService;
+        this.authRepository = authRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtServicio = jwtServicio;
+    }
+
+    @PostMapping("/login")
+    public LoginRespuesta login(
+            @Valid @RequestBody LoginSolicitud datos) {
+
+        Auth usuario = authRepository.findByUsername(datos.username())
+                .filter(auth -> passwordEncoder.matches(
+                        datos.password(), auth.getPassword()))
+                .orElseThrow(() -> new CredencialesException(
+                        "Usuario o contraseña incorrectos"));
+
+        String token = jwtServicio.generar(
+                usuario.getUsername(),
+                usuario.getRol()
+        );
+
+        return new LoginRespuesta(
+                token,
+                new UsuarioDTO(
+                        usuario.getUsername(),
+                        usuario.getRol()
+                )
+        );
+    }
 
     @GetMapping
     public ResponseEntity<List<Auth>> listar() {
@@ -26,7 +72,8 @@ public class AuthController {
     }
 
     @PostMapping
-    public ResponseEntity<Auth> guardar(@Valid @RequestBody Auth auth) {
+    public ResponseEntity<Auth> guardar(
+            @Valid @RequestBody Auth auth) {
 
         Auth guardado = authService.guardarAuth(auth);
 
@@ -34,7 +81,8 @@ public class AuthController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Auth> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<Auth> buscarPorId(
+            @PathVariable Long id) {
 
         Auth auth = authService.buscarPorId(id);
 
@@ -48,8 +96,7 @@ public class AuthController {
     @PutMapping("/{id}")
     public ResponseEntity<Auth> actualizar(
             @PathVariable Long id,
-            @Valid @RequestBody Auth auth
-    ) {
+            @Valid @RequestBody Auth auth) {
 
         Auth actualizado = authService.actualizarAuth(id, auth);
 
@@ -61,7 +108,8 @@ public class AuthController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(
+            @PathVariable Long id) {
 
         authService.eliminarAuth(id);
 

@@ -1,5 +1,6 @@
 package com.project.msvc_auth.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,6 +17,7 @@ public class Auth {
     @NotBlank(message = "El username es obligatorio")
     private String username;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotBlank(message = "La password es obligatoria")
     private String password;
 

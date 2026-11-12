@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -19,6 +20,9 @@ public class AuthServiceTest {
 
     @Mock
     private AuthRepository authRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private AuthService authService;
@@ -58,14 +62,18 @@ public class AuthServiceTest {
 
         Auth auth = new Auth();
         auth.setUsername("usuarioNuevo");
+        auth.setPassword("1234");
 
+        when(passwordEncoder.encode("1234")).thenReturn("hash1234");
         when(authRepository.save(auth)).thenReturn(auth);
 
         Auth resultado = authService.guardarAuth(auth);
 
         assertNotNull(resultado);
         assertEquals("usuarioNuevo", resultado.getUsername());
+        assertEquals("hash1234", resultado.getPassword());
 
+        verify(passwordEncoder, times(1)).encode("1234");
         verify(authRepository, times(1)).save(auth);
     }
 
@@ -75,24 +83,26 @@ public class AuthServiceTest {
         Auth authExistente = new Auth();
         authExistente.setId(1L);
         authExistente.setUsername("usuario1");
-        authExistente.setPassword("1234");
-        authExistente.setRol("Jugador");
+        authExistente.setPassword("hashAnterior");
+        authExistente.setRol("USER");
 
         Auth nuevoAuth = new Auth();
         nuevoAuth.setUsername("usuarioActualizado");
         nuevoAuth.setPassword("5678");
-        nuevoAuth.setRol("Administrador");
+        nuevoAuth.setRol("ADMIN");
 
         when(authRepository.findById(1L)).thenReturn(Optional.of(authExistente));
+        when(passwordEncoder.encode("5678")).thenReturn("hash5678");
         when(authRepository.save(any(Auth.class))).thenReturn(authExistente);
 
         Auth resultado = authService.actualizarAuth(1L, nuevoAuth);
 
         assertNotNull(resultado);
         assertEquals("usuarioActualizado", resultado.getUsername());
-        assertEquals("5678", resultado.getPassword());
-        assertEquals("Administrador", resultado.getRol());
+        assertEquals("hash5678", resultado.getPassword());
+        assertEquals("ADMIN", resultado.getRol());
 
+        verify(passwordEncoder, times(1)).encode("5678");
         verify(authRepository, times(1)).findById(1L);
         verify(authRepository, times(1)).save(any(Auth.class));
     }
@@ -104,5 +114,4 @@ public class AuthServiceTest {
 
         verify(authRepository, times(1)).deleteById(1L);
     }
-
 }
