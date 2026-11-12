@@ -2,7 +2,7 @@ package com.project.msvc_auth.service;
 
 import com.project.msvc_auth.model.Auth;
 import com.project.msvc_auth.repository.AuthRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +14,13 @@ public class AuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
-    @Autowired
-    private AuthRepository authRepository;
+    private final AuthRepository authRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public AuthService(AuthRepository authRepository, PasswordEncoder passwordEncoder) {
+        this.authRepository = authRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public List<Auth> listarAuth() {
 
@@ -27,6 +32,8 @@ public class AuthService {
     public Auth guardarAuth(Auth auth) {
 
         logger.info("Guardando auth: " + auth.getUsername());
+
+        auth.setPassword(passwordEncoder.encode(auth.getPassword()));
 
         return authRepository.save(auth);
     }
@@ -47,7 +54,7 @@ public class AuthService {
         if (authExistente != null) {
 
             authExistente.setUsername(auth.getUsername());
-            authExistente.setPassword(auth.getPassword());
+            authExistente.setPassword(passwordEncoder.encode(auth.getPassword()));
             authExistente.setRol(auth.getRol());
 
             return authRepository.save(authExistente);
