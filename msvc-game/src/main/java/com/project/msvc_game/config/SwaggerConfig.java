@@ -14,6 +14,6 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("API Juegos")
                         .version("1.0")
-                        .description("Documentación OpenAPI del microservicio de autenticación y gestión de acceso de eSports Arena Manager"));
+                        .description("Documentación OpenAPI del microservicio de videojuegos de eSports Arena Manager"));
     }
 }
