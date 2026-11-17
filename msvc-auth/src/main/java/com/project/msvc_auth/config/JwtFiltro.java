@@ -36,7 +36,7 @@ public class JwtFiltro extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             try {
                 autenticar(jwt.validar(header.substring(7)));
-            } catch (JwtException e) {
+            } catch (JwtException | IllegalArgumentException e) {
                 SecurityContextHolder.clearContext();
             }
         }
