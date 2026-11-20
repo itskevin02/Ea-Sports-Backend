@@ -95,13 +95,15 @@ public class RegistrationService {
             );
         }
 
-        if (tournament.getEstado() != null &&
-                !tournament.getEstado().equalsIgnoreCase("ACTIVO")) {
+         if (tournament.getEstado() != null &&
+                 !tournament.getEstado().equalsIgnoreCase("ACTIVO") &&
+                 !tournament.getEstado().equalsIgnoreCase("Abierto")) {
 
-            throw new RuntimeException(
-                    "El torneo no está activo"
-            );
-        }
+        throw new RuntimeException(
+                        "El torneo no está abierto para inscripciones"
+         );
+         }
+
 
         long inscritos =
                 registrationRepository.countByTorneoId(
