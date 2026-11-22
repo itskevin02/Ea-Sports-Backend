@@ -3,8 +3,10 @@ package com.project.msvc_auth.controller;
 import com.project.msvc_auth.model.Auth;
 import com.project.msvc_auth.repository.AuthRepository;
 import com.project.msvc_auth.service.JwtServicio;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -40,7 +42,9 @@ class AuthControllerIntegrationTest {
 
         Auth usuario = new Auth();
         usuario.setUsername("adminPrueba");
-        usuario.setPassword(passwordEncoder.encode("Clave1234"));
+        usuario.setPassword(
+                passwordEncoder.encode("Clave1234")
+        );
         usuario.setRol("ADMIN");
 
         authRepository.save(usuario);
@@ -59,9 +63,13 @@ class AuthControllerIntegrationTest {
                         """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").isNotEmpty())
-                .andExpect(jsonPath("$.usuario.username").value("adminPrueba"))
-                .andExpect(jsonPath("$.usuario.rol").value("ADMIN"))
-                .andExpect(jsonPath("$.usuario.password").doesNotExist());
+                .andExpect(jsonPath("$.usuario.authId").isNumber())
+                .andExpect(jsonPath("$.usuario.username")
+                        .value("adminPrueba"))
+                .andExpect(jsonPath("$.usuario.rol")
+                        .value("ADMIN"))
+                .andExpect(jsonPath("$.usuario.password")
+                        .doesNotExist());
     }
 
     @Test
@@ -90,42 +98,58 @@ class AuthControllerIntegrationTest {
     @Test
     void accesoSinPermisosTest() throws Exception {
 
-        String token = jwtServicio.generar("usuarioPrueba", "USER");
+        String token = jwtServicio.generar(
+                "usuarioPrueba",
+                "USER",
+                1L
+        );
 
         mockMvc.perform(get("/auth")
                 .header("Authorization", "Bearer " + token))
                 .andExpect(status().isForbidden());
     }
 
-@Test
-void listadoNoMuestraPasswordTest() throws Exception {
+    @Test
+    void listadoNoMuestraPasswordTest() throws Exception {
 
-    String token = jwtServicio.generar("adminPrueba", "ADMIN");
+        String token = jwtServicio.generar(
+                "adminPrueba",
+                "ADMIN",
+                1L
+        );
 
-    mockMvc.perform(get("/auth")
-            .header("Authorization", "Bearer " + token))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].username").value("adminPrueba"))
-            .andExpect(jsonPath("$[0].password").doesNotExist());
-}
+        mockMvc.perform(get("/auth")
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].username")
+                        .value("adminPrueba"))
+                .andExpect(jsonPath("$[0].password")
+                        .doesNotExist());
+    }
 
-@Test
-void guardarNoMuestraPasswordTest() throws Exception {
+    @Test
+    void guardarNoMuestraPasswordTest() throws Exception {
 
-    String token = jwtServicio.generar("adminPrueba", "ADMIN");
+        String token = jwtServicio.generar(
+                "adminPrueba",
+                "ADMIN",
+                1L
+        );
 
-    mockMvc.perform(post("/auth")
-            .header("Authorization", "Bearer " + token)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                    {
-                        "username": "usuarioNuevo",
-                        "password": "Clave5678",
-                        "rol": "USER"
-                    }
-                    """))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.username").value("usuarioNuevo"))
-            .andExpect(jsonPath("$.password").doesNotExist());
+        mockMvc.perform(post("/auth")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "username": "usuarioNuevo",
+                            "password": "Clave5678",
+                            "rol": "USER"
+                        }
+                        """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.username")
+                        .value("usuarioNuevo"))
+                .andExpect(jsonPath("$.password")
+                        .doesNotExist());
     }
 }

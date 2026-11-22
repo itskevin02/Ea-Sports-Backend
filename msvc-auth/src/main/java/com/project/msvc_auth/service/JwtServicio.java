@@ -3,6 +3,7 @@ package com.project.msvc_auth.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,8 @@ public class JwtServicio {
 
     public JwtServicio(
             @Value("${app.jwt.secreto}") String secreto,
-            @Value("${app.jwt.duracion-ms}") long duracionMs) {
+            @Value("${app.jwt.duracion-ms}") long duracionMs
+    ) {
 
         this.clave = Keys.hmacShaKeyFor(
                 secreto.getBytes(StandardCharsets.UTF_8)
@@ -27,13 +29,28 @@ public class JwtServicio {
         this.duracionMs = duracionMs;
     }
 
-    public String generar(String username, String rol) {
+    public String generar(
+            String username,
+            String rol,
+            Long authId
+    ) {
+
+        if (authId == null) {
+            throw new IllegalArgumentException(
+                    "El identificador de Auth es obligatorio"
+            );
+        }
 
         return Jwts.builder()
                 .subject(username)
                 .claim("rol", rol)
+                .claim("authId", authId)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + duracionMs))
+                .expiration(
+                        new Date(
+                                System.currentTimeMillis() + duracionMs
+                        )
+                )
                 .signWith(clave)
                 .compact();
     }
