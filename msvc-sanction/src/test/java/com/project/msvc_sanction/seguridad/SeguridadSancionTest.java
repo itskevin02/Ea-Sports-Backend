@@ -24,6 +24,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
+import com.project.msvc_sanction.service.UsuarioValidador;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -244,4 +246,6 @@ class SeguridadSancionTest {
                 respuesta.getStatusCode()
         );
     }
+        @MockitoBean
+                private UsuarioValidador usuarioValidador;
 }
