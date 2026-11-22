@@ -2,8 +2,12 @@ package com.project.msvc_sanction.controller;
 
 import com.project.msvc_sanction.model.Sanction;
 import com.project.msvc_sanction.service.SanctionService;
+import com.project.msvc_sanction.service.UsuarioValidador;
+
 import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,24 +21,40 @@ public class SanctionController {
     @Autowired
     private SanctionService sanctionService;
 
+    @Autowired
+    private UsuarioValidador usuarioValidador;
+
     @GetMapping
     public ResponseEntity<List<Sanction>> listar() {
 
-        List<Sanction> lista = sanctionService.listarSanctions();
-
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(
+                sanctionService.listarSanctions()
+        );
     }
 
     @PostMapping
-    public ResponseEntity<Sanction> guardar(@Valid @RequestBody Sanction sanction) {
+    public ResponseEntity<Sanction> guardar(
+            @Valid @RequestBody Sanction sanction,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization
+    ) {
 
-        Sanction guardado = sanctionService.guardarSanction(sanction);
+        usuarioValidador.validar(
+                sanction.getUsuarioId(),
+                authorization
+        );
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
+        Sanction guardada =
+                sanctionService.guardarSanction(sanction);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(guardada);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Sanction> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<Sanction> buscarPorId(
+            @PathVariable Long id
+    ) {
 
         Sanction sanction = sanctionService.buscarPorId(id);
 
@@ -48,20 +68,29 @@ public class SanctionController {
     @PutMapping("/{id}")
     public ResponseEntity<Sanction> actualizar(
             @PathVariable Long id,
-            @Valid @RequestBody Sanction sanction
+            @Valid @RequestBody Sanction sanction,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization
     ) {
 
-        Sanction actualizado = sanctionService.actualizarSanction(id, sanction);
-
-        if (actualizado != null) {
-            return ResponseEntity.ok(actualizado);
+        if (sanctionService.buscarPorId(id) == null) {
+            return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.notFound().build();
+        usuarioValidador.validar(
+                sanction.getUsuarioId(),
+                authorization
+        );
+
+        Sanction actualizada =
+                sanctionService.actualizarSanction(id, sanction);
+
+        return ResponseEntity.ok(actualizada);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(
+            @PathVariable Long id
+    ) {
 
         sanctionService.eliminarSanction(id);
 
