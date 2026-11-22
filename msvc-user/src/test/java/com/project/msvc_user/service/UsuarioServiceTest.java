@@ -2,8 +2,10 @@ package com.project.msvc_user.service;
 
 import com.project.msvc_user.model.Usuario;
 import com.project.msvc_user.repository.UsuarioRepository;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +22,9 @@ public class UsuarioServiceTest {
     @Mock
     private UsuarioRepository usuarioRepository;
 
+    @Mock
+    private SancionValidador sancionValidador;
+
     @InjectMocks
     private UsuarioService usuarioService;
 
@@ -29,9 +34,13 @@ public class UsuarioServiceTest {
         Usuario usuario = new Usuario();
         usuario.setNombre("Usuario 1");
 
-        when(usuarioRepository.findAll()).thenReturn(Arrays.asList(usuario));
+        when(usuarioRepository.findAll())
+                .thenReturn(Arrays.asList(usuario));
 
-        assertEquals(1, usuarioService.listarUsuarios().size());
+        assertEquals(
+                1,
+                usuarioService.listarUsuarios().size()
+        );
 
         verify(usuarioRepository, times(1)).findAll();
     }
@@ -43,7 +52,8 @@ public class UsuarioServiceTest {
         usuario.setId(1L);
         usuario.setNombre("Usuario 1");
 
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findById(1L))
+                .thenReturn(Optional.of(usuario));
 
         Usuario resultado = usuarioService.buscarPorId(1L);
 
@@ -59,7 +69,8 @@ public class UsuarioServiceTest {
         Usuario usuario = new Usuario();
         usuario.setNombre("Usuario Nuevo");
 
-        when(usuarioRepository.save(usuario)).thenReturn(usuario);
+        when(usuarioRepository.save(usuario))
+                .thenReturn(usuario);
 
         Usuario resultado = usuarioService.guardarUsuario(usuario);
 
@@ -87,28 +98,69 @@ public class UsuarioServiceTest {
         nuevoUsuario.setRol("Administrador");
         nuevoUsuario.setEstado("Inactivo");
 
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioExistente));
-        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuarioExistente);
+        when(usuarioRepository.findById(1L))
+                .thenReturn(Optional.of(usuarioExistente));
 
-        Usuario resultado = usuarioService.actualizarUsuario(1L, nuevoUsuario);
+        when(usuarioRepository.save(any(Usuario.class)))
+                .thenReturn(usuarioExistente);
+
+        Usuario resultado = usuarioService.actualizarUsuario(
+                1L,
+                nuevoUsuario
+        );
 
         assertNotNull(resultado);
-        assertEquals("Usuario Actualizado", resultado.getNombre());
-        assertEquals("correo2@correo.com", resultado.getCorreo());
-        assertEquals("usuario2", resultado.getNickname());
-        assertEquals("Administrador", resultado.getRol());
-        assertEquals("Inactivo", resultado.getEstado());
+
+        assertEquals(
+                "Usuario Actualizado",
+                resultado.getNombre()
+        );
+
+        assertEquals(
+                "correo2@correo.com",
+                resultado.getCorreo()
+        );
+
+        assertEquals(
+                "usuario2",
+                resultado.getNickname()
+        );
+
+        assertEquals(
+                "Administrador",
+                resultado.getRol()
+        );
+
+        assertEquals(
+                "Inactivo",
+                resultado.getEstado()
+        );
 
         verify(usuarioRepository, times(1)).findById(1L);
-        verify(usuarioRepository, times(1)).save(any(Usuario.class));
+
+        verify(usuarioRepository, times(1))
+                .save(any(Usuario.class));
     }
 
     @Test
     void eliminarUsuarioTest() {
 
-        usuarioService.eliminarUsuario(1L);
+        // El usuario existe
+        when(usuarioRepository.existsById(1L))
+                .thenReturn(true);
 
-        verify(usuarioRepository, times(1)).deleteById(1L);
+        usuarioService.eliminarUsuario(
+                1L,
+                "Bearer prueba"
+        );
+
+        verify(sancionValidador, times(1))
+                .validarSinSanciones(
+                        1L,
+                        "Bearer prueba"
+                );
+
+        verify(usuarioRepository, times(1))
+                .deleteById(1L);
     }
-
 }
