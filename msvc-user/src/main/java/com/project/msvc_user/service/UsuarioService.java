@@ -25,6 +25,9 @@ public class UsuarioService {
     @Autowired
     private SancionValidador sancionValidador;
 
+    @Autowired
+    private CuentaAuthValidador cuentaAuthValidador;
+
     public List<Usuario> listarUsuarios() {
 
         logger.info("Listando usuarios");
@@ -44,6 +47,54 @@ public class UsuarioService {
         logger.info("Buscando usuario con id: " + id);
 
         return usuarioRepository.findById(id).orElse(null);
+    }
+
+    public Usuario buscarPorAuthId(Long authId) {
+
+        return usuarioRepository.findByAuthId(authId)
+                .orElse(null);
+    }
+
+    public Usuario vincularCuenta(
+            Long usuarioId,
+            Long authId,
+            String authorization
+    ) {
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "El perfil no existe"
+                ));
+
+        if (authId == null || authId <= 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "El authId no es valido"
+            );
+        }
+
+        Usuario vinculado = buscarPorAuthId(authId);
+
+        if (vinculado != null &&
+                !vinculado.getId().equals(usuarioId)) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "La cuenta ya esta vinculada a otro perfil"
+            );
+        }
+
+        cuentaAuthValidador.validar(
+                authId,
+                authorization
+        );
+
+        usuario.setAuthId(authId);
+
+        logger.info("Vinculando cuenta Auth con perfil: " + usuarioId);
+
+        return usuarioRepository.save(usuario);
     }
 
     public Usuario actualizarUsuario(Long id, Usuario usuario) {
