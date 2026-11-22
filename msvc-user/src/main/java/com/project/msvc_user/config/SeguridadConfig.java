@@ -12,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 public class SeguridadConfig {
@@ -54,12 +55,20 @@ public class SeguridadConfig {
                                 "/v3/api-docs/**",
                                 "/error"
                         ).permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/users/mi-perfil"
+                        ).hasAnyRole("ADMIN", "USUARIO", "USER")
+
                         .requestMatchers(
                                 "/users",
                                 "/users/**"
                         ).hasRole("ADMIN")
+
                         .anyRequest().denyAll()
                 )
+
                 .addFilterBefore(
                         jwtFiltro,
                         UsernamePasswordAuthenticationFilter.class

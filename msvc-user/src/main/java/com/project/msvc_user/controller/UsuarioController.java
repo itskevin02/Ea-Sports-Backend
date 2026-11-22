@@ -1,6 +1,7 @@
 package com.project.msvc_user.controller;
 
 import com.project.msvc_user.model.Usuario;
+import com.project.msvc_user.service.JwtServicio;
 import com.project.msvc_user.service.UsuarioService;
 
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -19,6 +21,9 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private JwtServicio jwtServicio;
 
     @GetMapping
     public ResponseEntity<List<Usuario>> listar() {
@@ -38,6 +43,58 @@ public class UsuarioController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(guardado);
+    }
+
+    @GetMapping("/mi-perfil")
+    public ResponseEntity<Usuario> miPerfil(
+            @RequestHeader(HttpHeaders.AUTHORIZATION)
+            String authorization
+    ) {
+
+        if (!authorization.startsWith("Bearer ")) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Token no valido"
+            );
+        }
+
+        Object dato = jwtServicio
+                .validar(authorization.substring(7))
+                .get("authId");
+
+        if (!(dato instanceof Number)) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "La sesion no contiene authId"
+            );
+        }
+
+        Long authId = ((Number) dato).longValue();
+
+        Usuario usuario = usuarioService.buscarPorAuthId(authId);
+
+        if (usuario == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(usuario);
+    }
+
+    @PutMapping("/{id}/vincular-auth/{authId}")
+    public ResponseEntity<Usuario> vincularCuenta(
+            @PathVariable Long id,
+            @PathVariable Long authId,
+            @RequestHeader(HttpHeaders.AUTHORIZATION)
+            String authorization
+    ) {
+
+        Usuario usuario = usuarioService.vincularCuenta(
+                id,
+                authId,
+                authorization
+        );
+
+        return ResponseEntity.ok(usuario);
     }
 
     @GetMapping("/{id}")
