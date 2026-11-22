@@ -49,18 +49,21 @@ public class AuthController {
                 .orElseThrow(() -> new CredencialesException(
                         "Usuario o contraseña incorrectos"));
 
-        String token = jwtServicio.generar(
-                usuario.getUsername(),
-                usuario.getRol()
-        );
-
-        return new LoginRespuesta(
-                token,
-                new UsuarioDTO(
+                String token = jwtServicio.generar(
                         usuario.getUsername(),
-                        usuario.getRol()
-                )
-        );
+                        usuario.getRol(),
+                        usuario.getId()
+                );
+
+                return new LoginRespuesta(
+                        token,
+                        new UsuarioDTO(
+                                usuario.getId(),
+                                usuario.getUsername(),
+                                usuario.getRol()
+                        )
+                );
+
     }
 
     @GetMapping
