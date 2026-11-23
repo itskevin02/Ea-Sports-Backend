@@ -2,8 +2,10 @@ package com.project.msvc_game.service;
 
 import com.project.msvc_game.model.Juego;
 import com.project.msvc_game.repository.JuegoRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +14,8 @@ import java.util.List;
 @Service
 public class JuegoService {
 
-    private static final Logger logger = LoggerFactory.getLogger(JuegoService.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(JuegoService.class);
 
     @Autowired
     private JuegoRepository juegoRepository;
@@ -42,15 +45,22 @@ public class JuegoService {
 
         logger.info("Actualizando juego con id: " + id);
 
-        Juego juegoExistente = juegoRepository.findById(id).orElse(null);
+        Juego juegoExistente =
+                juegoRepository.findById(id).orElse(null);
 
         if (juegoExistente != null) {
 
             juegoExistente.setNombre(juego.getNombre());
             juegoExistente.setGenero(juego.getGenero());
             juegoExistente.setModalidad(juego.getModalidad());
-            juegoExistente.setJugadoresPorEquipo(juego.getJugadoresPorEquipo());
+
+            juegoExistente.setJugadoresPorEquipo(
+                    juego.getJugadoresPorEquipo()
+            );
+
             juegoExistente.setEstado(juego.getEstado());
+
+            juegoExistente.setImagen(juego.getImagen());
 
             return juegoRepository.save(juegoExistente);
         }
