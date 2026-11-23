@@ -8,7 +8,7 @@ spring:
         webmvc:
           routes:
             - id: msvc-auth
-              uri: lb://msvc-auth
+              uri: ${AUTH_SERVICE_URL:lb://msvc-auth}
               predicates:
                 - Path=/auth/**
 
