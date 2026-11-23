@@ -14,6 +14,9 @@ public class Ranking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "El torneo es obligatorio")
+    private Long torneoId;
+
     @NotBlank(message = "El nombre del equipo es obligatorio")
     private String nombreEquipo;
 
@@ -44,6 +47,10 @@ public class Ranking {
         return id;
     }
 
+    public Long getTorneoId() {
+        return torneoId;
+    }
+
     public String getNombreEquipo() {
         return nombreEquipo;
     }
@@ -62,6 +69,10 @@ public class Ranking {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void setTorneoId(Long torneoId) {
+        this.torneoId = torneoId;
     }
 
     public void setNombreEquipo(String nombreEquipo) {
