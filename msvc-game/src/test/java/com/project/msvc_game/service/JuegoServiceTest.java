@@ -2,8 +2,10 @@ package com.project.msvc_game.service;
 
 import com.project.msvc_game.model.Juego;
 import com.project.msvc_game.repository.JuegoRepository;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,7 +31,8 @@ public class JuegoServiceTest {
         Juego juego = new Juego();
         juego.setNombre("Juego 1");
 
-        when(juegoRepository.findAll()).thenReturn(Arrays.asList(juego));
+        when(juegoRepository.findAll())
+                .thenReturn(Arrays.asList(juego));
 
         assertEquals(1, juegoService.listarJuegos().size());
 
@@ -43,7 +46,8 @@ public class JuegoServiceTest {
         juego.setId(1L);
         juego.setNombre("Juego 1");
 
-        when(juegoRepository.findById(1L)).thenReturn(Optional.of(juego));
+        when(juegoRepository.findById(1L))
+                .thenReturn(Optional.of(juego));
 
         Juego resultado = juegoService.buscarPorId(1L);
 
@@ -59,7 +63,8 @@ public class JuegoServiceTest {
         Juego juego = new Juego();
         juego.setNombre("Juego Nuevo");
 
-        when(juegoRepository.save(juego)).thenReturn(juego);
+        when(juegoRepository.save(juego))
+                .thenReturn(juego);
 
         Juego resultado = juegoService.guardarJuego(juego);
 
@@ -86,11 +91,16 @@ public class JuegoServiceTest {
         nuevoJuego.setModalidad("Presencial");
         nuevoJuego.setJugadoresPorEquipo(10);
         nuevoJuego.setEstado("Inactivo");
+        nuevoJuego.setImagen("https://ejemplo.com/juego.jpg");
 
-        when(juegoRepository.findById(1L)).thenReturn(Optional.of(juegoExistente));
-        when(juegoRepository.save(any(Juego.class))).thenReturn(juegoExistente);
+        when(juegoRepository.findById(1L))
+                .thenReturn(Optional.of(juegoExistente));
 
-        Juego resultado = juegoService.actualizarJuego(1L, nuevoJuego);
+        when(juegoRepository.save(any(Juego.class)))
+                .thenReturn(juegoExistente);
+
+        Juego resultado =
+                juegoService.actualizarJuego(1L, nuevoJuego);
 
         assertNotNull(resultado);
         assertEquals("Juego Actualizado", resultado.getNombre());
@@ -99,8 +109,16 @@ public class JuegoServiceTest {
         assertEquals(10, resultado.getJugadoresPorEquipo());
         assertEquals("Inactivo", resultado.getEstado());
 
-        verify(juegoRepository, times(1)).findById(1L);
-        verify(juegoRepository, times(1)).save(any(Juego.class));
+        assertEquals(
+                "https://ejemplo.com/juego.jpg",
+                resultado.getImagen()
+        );
+
+        verify(juegoRepository, times(1))
+                .findById(1L);
+
+        verify(juegoRepository, times(1))
+                .save(any(Juego.class));
     }
 
     @Test
@@ -111,4 +129,23 @@ public class JuegoServiceTest {
         verify(juegoRepository, times(1)).deleteById(1L);
     }
 
+    @Test
+    void guardarJuegoConImagenTest() {
+
+        Juego juego = new Juego();
+        juego.setNombre("Juego con imagen");
+        juego.setImagen("https://ejemplo.com/imagen.jpg");
+
+        when(juegoRepository.save(juego))
+                .thenReturn(juego);
+
+        Juego resultado = juegoService.guardarJuego(juego);
+
+        assertEquals(
+                "https://ejemplo.com/imagen.jpg",
+                resultado.getImagen()
+        );
+
+        verify(juegoRepository, times(1)).save(juego);
+    }
 }

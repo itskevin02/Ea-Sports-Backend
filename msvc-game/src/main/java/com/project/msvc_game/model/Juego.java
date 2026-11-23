@@ -1,5 +1,6 @@
 package com.project.msvc_game.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,10 +32,15 @@ public class Juego {
     @NotBlank(message = "El estado es obligatorio")
     private String estado;
 
+    @Column(length = 1000)
+    private String imagen;
+
     public Juego() {
     }
 
-    public Juego(Long id, String nombre, String genero, String modalidad, Integer jugadoresPorEquipo, String estado) {
+    public Juego(Long id, String nombre, String genero,
+                 String modalidad, Integer jugadoresPorEquipo,
+                 String estado) {
         this.id = id;
         this.nombre = nombre;
         this.genero = genero;
@@ -89,5 +95,13 @@ public class Juego {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
 }
