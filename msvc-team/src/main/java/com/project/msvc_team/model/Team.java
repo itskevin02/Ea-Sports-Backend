@@ -1,9 +1,12 @@
 package com.project.msvc_team.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -26,10 +29,19 @@ public class Team {
     @NotBlank(message = "El estado es obligatorio")
     private String estado;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long authId;
+
     public Team() {
     }
 
-    public Team(Long id, String nombre, String coach, Long juegoId, String estado) {
+    public Team(
+            Long id,
+            String nombre,
+            String coach,
+            Long juegoId,
+            String estado
+    ) {
         this.id = id;
         this.nombre = nombre;
         this.coach = coach;
@@ -57,6 +69,10 @@ public class Team {
         return estado;
     }
 
+    public Long getAuthId() {
+        return authId;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -75,5 +91,9 @@ public class Team {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public void setAuthId(Long authId) {
+        this.authId = authId;
     }
 }

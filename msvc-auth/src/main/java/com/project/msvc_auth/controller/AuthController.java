@@ -2,8 +2,11 @@ package com.project.msvc_auth.controller;
 
 import com.project.msvc_auth.dto.LoginSolicitud;
 import com.project.msvc_auth.dto.LoginRespuesta;
+import com.project.msvc_auth.dto.RegistroCuentaSolicitud;
 import com.project.msvc_auth.dto.UsuarioDTO;
+
 import com.project.msvc_auth.exception.CredencialesException;
+
 import com.project.msvc_auth.model.Auth;
 import com.project.msvc_auth.repository.AuthRepository;
 import com.project.msvc_auth.service.AuthService;
@@ -31,8 +34,8 @@ public class AuthController {
             AuthService authService,
             AuthRepository authRepository,
             PasswordEncoder passwordEncoder,
-            JwtServicio jwtServicio) {
-
+            JwtServicio jwtServicio
+    ) {
         this.authService = authService;
         this.authRepository = authRepository;
         this.passwordEncoder = passwordEncoder;
@@ -41,51 +44,77 @@ public class AuthController {
 
     @PostMapping("/login")
     public LoginRespuesta login(
-            @Valid @RequestBody LoginSolicitud datos) {
+            @Valid @RequestBody LoginSolicitud datos
+    ) {
 
-        Auth usuario = authRepository.findByUsername(datos.username())
+        Auth usuario = authRepository
+                .findByUsername(datos.username())
                 .filter(auth -> passwordEncoder.matches(
-                        datos.password(), auth.getPassword()))
+                        datos.password(),
+                        auth.getPassword()
+                ))
                 .orElseThrow(() -> new CredencialesException(
-                        "Usuario o contraseña incorrectos"));
+                        "Usuario o contraseña incorrectos"
+                ));
 
-                String token = jwtServicio.generar(
+        String token = jwtServicio.generar(
+                usuario.getUsername(),
+                usuario.getRol(),
+                usuario.getId()
+        );
+
+        return new LoginRespuesta(
+                token,
+                new UsuarioDTO(
+                        usuario.getId(),
                         usuario.getUsername(),
-                        usuario.getRol(),
-                        usuario.getId()
-                );
+                        usuario.getRol()
+                )
+        );
+    }
 
-                return new LoginRespuesta(
-                        token,
-                        new UsuarioDTO(
-                                usuario.getId(),
-                                usuario.getUsername(),
-                                usuario.getRol()
-                        )
-                );
+    @PostMapping("/registro")
+    public ResponseEntity<UsuarioDTO> registrar(
+            @Valid @RequestBody RegistroCuentaSolicitud datos
+    ) {
 
+        Auth cuenta = authService.registrarCuenta(datos);
+
+        UsuarioDTO respuesta = new UsuarioDTO(
+                cuenta.getId(),
+                cuenta.getUsername(),
+                cuenta.getRol()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(respuesta);
     }
 
     @GetMapping
     public ResponseEntity<List<Auth>> listar() {
 
-        List<Auth> lista = authService.listarAuth();
-
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(
+                authService.listarAuth()
+        );
     }
 
     @PostMapping
     public ResponseEntity<Auth> guardar(
-            @Valid @RequestBody Auth auth) {
+            @Valid @RequestBody Auth auth
+    ) {
 
         Auth guardado = authService.guardarAuth(auth);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(guardado);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Auth> buscarPorId(
-            @PathVariable Long id) {
+            @PathVariable Long id
+    ) {
 
         Auth auth = authService.buscarPorId(id);
 
@@ -99,9 +128,11 @@ public class AuthController {
     @PutMapping("/{id}")
     public ResponseEntity<Auth> actualizar(
             @PathVariable Long id,
-            @Valid @RequestBody Auth auth) {
+            @Valid @RequestBody Auth auth
+    ) {
 
-        Auth actualizado = authService.actualizarAuth(id, auth);
+        Auth actualizado =
+                authService.actualizarAuth(id, auth);
 
         if (actualizado != null) {
             return ResponseEntity.ok(actualizado);
@@ -112,7 +143,8 @@ public class AuthController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(
-            @PathVariable Long id) {
+            @PathVariable Long id
+    ) {
 
         authService.eliminarAuth(id);
 

@@ -110,8 +110,17 @@ public class AuthServiceTest {
     @Test
     void eliminarAuthTest() {
 
-        authService.eliminarAuth(1L);
+    Auth auth = new Auth();
+    auth.setId(1L);
+    auth.setUsername("usuario1");
+    auth.setRol("USUARIO");
 
-        verify(authRepository, times(1)).deleteById(1L);
+    when(authRepository.findById(1L))
+            .thenReturn(Optional.of(auth));
+
+    authService.eliminarAuth(1L);
+
+    verify(authRepository, times(1)).findById(1L);
+    verify(authRepository, times(1)).deleteById(1L);
     }
 }

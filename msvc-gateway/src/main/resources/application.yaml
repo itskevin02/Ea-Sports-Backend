@@ -68,13 +68,13 @@ spring:
                 - Path=/notifications/**
 
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
 
 app:
   cors:
-    origenes: http://localhost:5173
+    origenes: ${CORS_ORIGENES:http://localhost:5173}
