@@ -7,6 +7,7 @@ import com.project.msvc_registration.repository.RegistrationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,6 +25,12 @@ public class RegistrationService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Value("${app.team.url:http://localhost:8084}")
+    private String teamUrl;
+
+    @Value("${app.tournament.url:http://localhost:8085}")
+    private String tournamentUrl;
+
     public List<Registration> listarRegistrations() {
 
         logger.info("Listando inscripciones");
@@ -40,7 +47,7 @@ public class RegistrationService {
         try {
 
             team = restTemplate.getForObject(
-                    "http://localhost:8084/teams/" +
+                    teamUrl + "/teams/" +
                             registration.getEquipoId(),
                     TeamDTO.class
             );
@@ -59,7 +66,7 @@ public class RegistrationService {
         try {
 
             tournament = restTemplate.getForObject(
-                    "http://localhost:8085/tournaments/" +
+                    tournamentUrl + "/tournaments/" +
                             registration.getTorneoId(),
                     TournamentDTO.class
             );
@@ -91,7 +98,7 @@ public class RegistrationService {
                 !team.getEstado().equalsIgnoreCase("ACTIVO")) {
 
             throw new RuntimeException(
-                    "El equipo no está activo"
+                    "El equipo no estÃ¡ activo"
             );
         }
 
@@ -100,7 +107,7 @@ public class RegistrationService {
                  !tournament.getEstado().equalsIgnoreCase("Abierto")) {
 
         throw new RuntimeException(
-                        "El torneo no está abierto para inscripciones"
+                        "El torneo no estÃ¡ abierto para inscripciones"
          );
          }
 
@@ -114,7 +121,7 @@ public class RegistrationService {
                 inscritos >= tournament.getCantidadEquipos()) {
 
             throw new RuntimeException(
-                    "El torneo ya alcanzó el máximo de equipos"
+                    "El torneo ya alcanzÃ³ el mÃ¡ximo de equipos"
             );
         }
 
@@ -127,18 +134,18 @@ public class RegistrationService {
         if (existente != null) {
 
             throw new RuntimeException(
-                    "El equipo ya está inscrito en este torneo"
+                    "El equipo ya estÃ¡ inscrito en este torneo"
             );
         }
 
-        logger.info("Guardando inscripción");
+        logger.info("Guardando inscripciÃ³n");
 
         return registrationRepository.save(registration);
     }
 
     public Registration buscarPorId(Long id) {
 
-        logger.info("Buscando inscripción con id: {}", id);
+        logger.info("Buscando inscripciÃ³n con id: {}", id);
 
         return registrationRepository.findById(id).orElse(null);
     }
@@ -148,7 +155,7 @@ public class RegistrationService {
             Registration registration
     ) {
 
-        logger.info("Actualizando inscripción con id: {}", id);
+        logger.info("Actualizando inscripciÃ³n con id: {}", id);
 
         Registration registrationExistente =
                 registrationRepository.findById(id).orElse(null);
@@ -177,7 +184,7 @@ public class RegistrationService {
 
     public void eliminarRegistration(Long id) {
 
-        logger.info("Eliminando inscripción con id: {}", id);
+        logger.info("Eliminando inscripciÃ³n con id: {}", id);
 
         registrationRepository.deleteById(id);
     }

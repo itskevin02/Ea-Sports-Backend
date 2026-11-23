@@ -13,57 +13,57 @@ spring:
                 - Path=/auth/**
 
             - id: msvc-game
-              uri: lb://msvc-game
+              uri: ${GAME_SERVICE_URL:lb://msvc-game}
               predicates:
                 - Path=/games/**
 
             - id: msvc-user
-              uri: lb://msvc-user
+              uri: ${USER_SERVICE_URL:lb://msvc-user}
               predicates:
                 - Path=/users/**
 
             - id: msvc-match
-              uri: lb://msvc-match
+              uri: ${MATCH_SERVICE_URL:lb://msvc-match}
               predicates:
                 - Path=/matches/**
 
             - id: msvc-team
-              uri: lb://msvc-team-service
+              uri: ${TEAM_SERVICE_URL:lb://msvc-team-service}
               predicates:
                 - Path=/teams/**
 
             - id: msvc-tournament
-              uri: lb://msvc-tournament
+              uri: ${TOURNAMENT_SERVICE_URL:lb://msvc-tournament}
               predicates:
                 - Path=/tournaments/**
 
             - id: msvc-registration
-              uri: lb://msvc-registration
+              uri: ${REGISTRATION_SERVICE_URL:lb://msvc-registration}
               predicates:
                 - Path=/registrations/**
 
             - id: msvc-result
-              uri: lb://msvc-result
+              uri: ${RESULT_SERVICE_URL:lb://msvc-result}
               predicates:
                 - Path=/results/**
 
             - id: msvc-ranking
-              uri: lb://msvc-ranking
+              uri: ${RANKING_SERVICE_URL:lb://msvc-ranking}
               predicates:
                 - Path=/rankings/**
 
             - id: msvc-sanction
-              uri: lb://msvc-sanction
+              uri: ${SANCTION_SERVICE_URL:lb://msvc-sanction}
               predicates:
                 - Path=/sanctions/**
 
             - id: msvc-prize
-              uri: lb://msvc-prize
+              uri: ${PRIZE_SERVICE_URL:lb://msvc-prize}
               predicates:
                 - Path=/prizes/**
 
             - id: msvc-notification
-              uri: lb://msvc-notification
+              uri: ${NOTIFICATION_SERVICE_URL:lb://msvc-notification}
               predicates:
                 - Path=/notifications/**
 
@@ -78,3 +78,4 @@ eureka:
 app:
   cors:
     origenes: ${CORS_ORIGENES:http://localhost:5173}
+
