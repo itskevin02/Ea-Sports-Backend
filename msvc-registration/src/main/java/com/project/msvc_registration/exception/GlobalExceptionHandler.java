@@ -3,9 +3,12 @@ package com.project.msvc_registration.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +17,9 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>>
-    manejarValidaciones(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, String>> manejarValidaciones(
+            MethodArgumentNotValidException ex
+    ) {
 
         Map<String, String> errores = new HashMap<>();
 
@@ -34,32 +38,46 @@ public class GlobalExceptionHandler {
                 .body(errores);
     }
 
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, String>> manejarEstado(
+            ResponseStatusException ex
+    ) {
+
+        return ResponseEntity
+                .status(ex.getStatusCode())
+                .body(Map.of(
+                        "mensaje",
+                        ex.getReason() == null
+                                ? "Operacion no permitida"
+                                : ex.getReason()
+                ));
+    }
+
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>>
-    manejarRuntime(RuntimeException ex) {
-
-        Map<String, String> error = new HashMap<>();
-
-        error.put("error", ex.getMessage());
+    public ResponseEntity<Map<String, String>> manejarRuntime(
+            RuntimeException ex
+    ) {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(error);
+                .body(Map.of(
+                        "error",
+                        ex.getMessage() == null
+                                ? "Error en la operacion"
+                                : ex.getMessage()
+                ));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>>
-    manejarGeneral(Exception ex) {
-
-        Map<String, String> error = new HashMap<>();
-
-        error.put(
-                "error",
-                "Error interno del servidor"
-        );
+    public ResponseEntity<Map<String, String>> manejarGeneral(
+            Exception ex
+    ) {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(error);
+                .body(Map.of(
+                        "error",
+                        "Error interno del servidor"
+                ));
     }
 }

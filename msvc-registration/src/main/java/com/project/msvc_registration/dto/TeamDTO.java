@@ -6,6 +6,7 @@ public class TeamDTO {
     private String nombre;
     private String coach;
     private String estado;
+    private Long authId;
 
     public TeamDTO() {
     }
@@ -26,6 +27,10 @@ public class TeamDTO {
         return estado;
     }
 
+    public Long getAuthId() {
+        return authId;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -40,5 +45,9 @@ public class TeamDTO {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public void setAuthId(Long authId) {
+        this.authId = authId;
     }
 }
